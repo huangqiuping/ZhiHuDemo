@@ -3,12 +3,13 @@
           package="com.learn.terry.zhihudemo">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
+        android:name=".ZhiHuApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:name=".ZhiHuApplication"
         android:theme="@style/AppTheme">
         <activity android:name=".ui.MainActivity">
             <intent-filter>
@@ -16,6 +17,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".ui.NewsDetailActivity">
         </activity>
     </application>
 

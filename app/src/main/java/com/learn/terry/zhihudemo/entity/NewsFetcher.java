@@ -1,33 +1,93 @@
 package com.learn.terry.zhihudemo.entity;
 
+import com.google.gson.Gson;
+import com.learn.terry.zhihudemo.http.Http;
 import com.learn.terry.zhihudemo.utils.LogUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
 /**
  * Created by dvb-sky on 2016/6/30.
  */
 public class NewsFetcher {
-    public static String ENDPOINT = "http://news-at.zhihu.com/api/4/news/";
+    public static String ENDPOINT = "http://news-at.zhihu.com/api/4/";
+    public static String NEWS = "news";
+    public static String START_IMAGE = "start-image";
     public static String NES_LIST_LATEST = "latest";
 
     public ArrayList<News> fetchNewsItems() {
-        return downloadNewsItems(ENDPOINT + NES_LIST_LATEST);
+        return downloadNewsItems(ENDPOINT + NEWS + "/" + NES_LIST_LATEST);
+    }
+
+    public NewsDetail fetchNewsDetail(News news) {
+        NewsDetail newsDetail = null;
+
+        String url = ENDPOINT + NEWS + "/" + news.getId();
+        String jsonString = Http.getUrl(url);
+        newsDetail = parseNewsDetail(jsonString);
+        return newsDetail;
+    }
+
+    public String fetchNewCss(NewsDetail newsDetail) {
+        ArrayList<String> css = newsDetail.getCss();
+        if (css.size() > 0) {
+            return Http.getUrl(css.get(0));
+        } else {
+            return null;
+        }
+    }
+
+    public Logo fetchLog(int size) {
+        Logo logo = null;
+        String url = ENDPOINT + START_IMAGE + "/" + convertSizeToString(size);
+        String jsonString = Http.getUrl(url);
+        logo = parseLogo(jsonString);
+
+        return logo;
+    }
+
+    private Logo parseLogo(String jsonString) {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonString, Logo.class);
+    }
+
+    private String convertSizeToString(int size) {
+        String string = "720*1184";
+
+        switch (size) {
+            case Logo.SIZE_SMALL:
+                string = "320*432";
+                break;
+
+            case Logo.SIZE_MIDDLE:
+                string = "480*728";
+                break;
+
+            case Logo.SIZE_LARGE:
+                string = "720*1184";
+                break;
+
+            case Logo.SIZE_HUGE:
+                string = "1080*1776";
+                break;
+        }
+
+        return string;
+    }
+
+
+    private NewsDetail parseNewsDetail(String jsonString) {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonString, NewsDetail.class);
     }
 
     private ArrayList<News> downloadNewsItems(String url) {
         ArrayList<News> newsItems = new ArrayList<>();
-        String jsonString = getUrl(url);
+        String jsonString = Http.getUrl(url);
         parseNewsItems(newsItems, jsonString);
 
         LogUtil.log("news: " + newsItems.toString());
@@ -38,7 +98,7 @@ public class NewsFetcher {
         try {
             JSONObject newsContent = new JSONObject(jsonString);
             JSONArray newsArray = newsContent.getJSONArray("stories");
-            for (int i=0; i<newsArray.length(); i++) {
+            for (int i = 0; i < newsArray.length(); i++) {
 
                 JSONObject newsInJson = newsArray.getJSONObject(i);
                 int id = newsInJson.optInt("id");
@@ -47,9 +107,8 @@ public class NewsFetcher {
 
                 if (newsInJson.has("images")) {
                     JSONArray images = newsInJson.getJSONArray("images");
-                    LogUtil.log("image count = " + images.length());
 
-                    for (int j=0; j<images.length();j++) {
+                    for (int j = 0; j < images.length(); j++) {
                         imageList.add((String) images.get(j));
                     }
                 }
@@ -61,50 +120,4 @@ public class NewsFetcher {
             e.printStackTrace();
         }
     }
-
-    private String getUrl(String urlSpec) {
-        LogUtil.log("get Url = " + urlSpec);
-
-        HttpURLConnection connection = null;
-        ByteArrayOutputStream outputStream = null;
-
-        try {
-            URL url = new URL(urlSpec);
-            connection = (HttpURLConnection) url.openConnection();
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                return null;
-            }
-
-            outputStream = new ByteArrayOutputStream();
-            InputStream inputStream = connection.getInputStream();
-
-            int bytesRead = 0;
-            byte[] buffer = new byte[4096];
-            while ((bytesRead = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            return outputStream.toString();
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return null;
-    }
-
 }

@@ -1,22 +1,30 @@
 package com.learn.terry.zhihudemo.ui;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.learn.terry.zhihudemo.R;
 import com.learn.terry.zhihudemo.adapter.NewsAdapter;
 import com.learn.terry.zhihudemo.task.LoadNewsTask;
+import com.learn.terry.zhihudemo.utils.LogUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener,
+                                                               LoadNewsTask.IOnFinishRefreshListener,
+                                                               AdapterView.OnItemClickListener {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mNewList;
+    private NewsAdapter mNewsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +49,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         setTitle(getTime());
 
         mNewList = (ListView) findViewById(R.id.news_list);
-        NewsAdapter adapter = new NewsAdapter(this, R.layout.news_item);
-        mNewList.setAdapter(adapter);
+        mNewsAdapter = new NewsAdapter(this, R.layout.news_item);
+        mNewList.setAdapter(mNewsAdapter);
+        mNewList.setOnItemClickListener(this);
 
-        new LoadNewsTask(adapter).execute();
+//        new LoadNewsTask(mNewsAdapter).execute();
 
     }
 
@@ -57,11 +66,27 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onRefresh() {
-        new Handler().postDelayed(new Runnable() {
+        LogUtil.log("onRefresh...");
+        new LoadNewsTask(mNewsAdapter, MainActivity.this).execute();
+    }
+
+    @Override
+    public void onFinishRefresh() {
+        LogUtil.log("refresh finish...");
+        mSwipeRefreshLayout.post(new Runnable() {
             @Override
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(false);
             }
-        }, 3000);
+        });
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Toast.makeText(this, "click " + position, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, NewsDetailActivity.class);
+        intent.putExtra("news", mNewsAdapter.getItem(position));
+
+        startActivity(intent);
     }
 }

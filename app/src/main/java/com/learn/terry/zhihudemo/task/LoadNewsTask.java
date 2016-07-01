@@ -15,9 +15,15 @@ import java.util.List;
 public class LoadNewsTask extends AsyncTask<Void, Void, ArrayList<News>> {
     private NewsAdapter mNewsAdapter;
     private NewsFetcher mNewsFetcher = new NewsFetcher();
+    private IOnFinishRefreshListener mRefreshListener;
 
     public LoadNewsTask(NewsAdapter newsAdapter) {
         mNewsAdapter = newsAdapter;
+    }
+
+    public LoadNewsTask(NewsAdapter newsAdapter, IOnFinishRefreshListener refreshListener) {
+        mNewsAdapter = newsAdapter;
+        mRefreshListener = refreshListener;
     }
 
     @Override
@@ -29,5 +35,12 @@ public class LoadNewsTask extends AsyncTask<Void, Void, ArrayList<News>> {
     @Override
     protected void onPostExecute(ArrayList<News> newses) {
         mNewsAdapter.refreshNewsList(newses);
+        if (mRefreshListener != null) {
+            mRefreshListener.onFinishRefresh();
+        }
+    }
+
+    public interface IOnFinishRefreshListener {
+        public void onFinishRefresh();
     }
 }
