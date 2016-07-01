@@ -13,9 +13,11 @@ import android.widget.Toast;
 
 import com.learn.terry.zhihudemo.R;
 import com.learn.terry.zhihudemo.adapter.NewsAdapter;
+import com.learn.terry.zhihudemo.task.LoadLogoTask;
 import com.learn.terry.zhihudemo.task.LoadNewsTask;
 import com.learn.terry.zhihudemo.utils.LogUtil;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -55,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
 //        new LoadNewsTask(mNewsAdapter).execute();
 
+        String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
+        LogUtil.log("path = " + logoSavePath);
+        new LoadLogoTask().execute(logoSavePath);
     }
 
     private String getTime() {

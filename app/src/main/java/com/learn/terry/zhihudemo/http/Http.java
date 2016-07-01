@@ -14,6 +14,16 @@ import java.net.URL;
  */
 public class Http {
     public static String getUrl(String urlSpec) {
+        byte[] data = getBytes(urlSpec);
+        if (data != null) {
+            return new String(data);
+        } else {
+            return null;
+        }
+    }
+
+
+    public static byte[] getBytes(String urlSpec) {
         LogUtil.log("get Url = " + urlSpec);
 
         HttpURLConnection connection = null;
@@ -37,7 +47,7 @@ public class Http {
                 outputStream.write(buffer, 0, bytesRead);
             }
 
-            return outputStream.toString();
+            return outputStream.toByteArray();
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -59,8 +69,5 @@ public class Http {
 
         return null;
     }
-
-
-
 
 }
