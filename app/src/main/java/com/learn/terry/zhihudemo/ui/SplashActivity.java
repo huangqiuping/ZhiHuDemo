@@ -1,6 +1,7 @@
 package com.learn.terry.zhihudemo.ui;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
@@ -14,8 +15,37 @@ import com.learn.terry.zhihudemo.utils.LogUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 public class SplashActivity extends AppCompatActivity {
+    private static final int JUMP_TO_HOME = 1;
+
+    private final MyHandler mHandler = new MyHandler(this);
+
+    private static class MyHandler extends Handler {
+        private final WeakReference<SplashActivity> mActivity;
+
+        private MyHandler(SplashActivity activity) {
+            mActivity = new WeakReference<SplashActivity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            SplashActivity activity = mActivity.get();
+
+            if (activity != null) {
+                LogUtil.log(activity.toString());
+                switch (msg.what) {
+                    case JUMP_TO_HOME:
+                        activity.finish();
+                        Intent intent = new Intent(activity, MainActivity.class);
+                        activity.startActivity(intent);
+                        break;
+                }
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,22 +57,26 @@ public class SplashActivity extends AppCompatActivity {
         delayToShowHome(2000);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LogUtil.log(getClass().getSimpleName() + " onDestroy...");
+        mHandler.removeMessages(JUMP_TO_HOME);
+    }
+
     private void delayToShowHome(int delay) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                finish();
-                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
-        }, delay);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(JUMP_TO_HOME), delay);
     }
 
     private void initLogo() {
         ImageView startLogo = (ImageView) findViewById(R.id.start_logo);
+        if (startLogo == null) {
+            return;
+        }
+
         String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
         File logoFile = new File(logoSavePath);
-        if (false && logoFile.exists()) {
+        if (logoFile.exists()) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeFile(logoSavePath, options);
@@ -57,9 +91,9 @@ public class SplashActivity extends AppCompatActivity {
                     calculateInSampleSize(options, displayMetrics.widthPixels, displayMetrics.heightPixels);
 
             LogUtil.log("in sample size = " + options.inSampleSize);
-            startLogo.setImageBitmap(BitmapFactory.decodeFile("file://android_asset/logo.jpg", options));
+            Bitmap bitmap = BitmapFactory.decodeFile(logoSavePath, options);
+            startLogo.setImageBitmap(bitmap);
         } else {
-            assert startLogo != null;
             try {
                 startLogo.setImageBitmap(BitmapFactory.decodeStream(getAssets().open("logo.jpg")));
             } catch (IOException e) {

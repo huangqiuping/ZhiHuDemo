@@ -21,7 +21,16 @@ public class LoadLogoTask extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... params) {
         Logo logo = new NewsFetcher().fetchLog(Logo.SIZE_HUGE);
+
+        if (logo == null) {
+            return null;
+        }
+
         byte[] logoData = Http.getBytes(logo.getImg());
+
+        if (logoData == null) {
+            return null;
+        }
 
         try {
             BufferedOutputStream bufferedOutputStream =
@@ -29,8 +38,6 @@ public class LoadLogoTask extends AsyncTask<String, Void, Void> {
             bufferedOutputStream.write(logoData);
 
             bufferedOutputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
