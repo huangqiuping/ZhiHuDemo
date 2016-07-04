@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 import android.widget.ImageView;
 
 import com.learn.terry.zhihudemo.R;
+import com.learn.terry.zhihudemo.task.LoadLogoTask;
 import com.learn.terry.zhihudemo.utils.LogUtil;
 
 import java.io.File;
@@ -54,7 +55,15 @@ public class SplashActivity extends AppCompatActivity {
 
         initLogo();
 
+        updateLogo();
+
         delayToShowHome(2000);
+    }
+
+    private void updateLogo() {
+        String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
+        LogUtil.log("path = " + logoSavePath);
+        new LoadLogoTask().execute(logoSavePath);
     }
 
     @Override

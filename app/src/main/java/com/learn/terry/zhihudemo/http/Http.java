@@ -22,7 +22,6 @@ public class Http {
         }
     }
 
-
     public static byte[] getBytes(String urlSpec) {
         LogUtil.log("get Url = " + urlSpec);
 

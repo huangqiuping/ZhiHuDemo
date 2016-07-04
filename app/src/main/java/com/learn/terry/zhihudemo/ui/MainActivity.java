@@ -57,9 +57,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
 //        new LoadNewsTask(mNewsAdapter).execute();
 
-        String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
-        LogUtil.log("path = " + logoSavePath);
-        new LoadLogoTask().execute(logoSavePath);
+//        String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
+//        LogUtil.log("path = " + logoSavePath);
+//        new LoadLogoTask().execute(logoSavePath);
     }
 
     private String getTime() {
@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         return SimpleDateFormat.getDateInstance().format(calendar.getTime());
     }
-
 
     @Override
     public void onRefresh() {
@@ -88,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(this, "click " + position, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "click " + position, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, NewsDetailActivity.class);
         intent.putExtra("news", mNewsAdapter.getItem(position));
 
