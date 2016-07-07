@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ZhiHuDemo</string>
+    <string name="preference_file_key" translatable="false">preference</string>
+    <string name="boot_logo" translatable="false">boot_logo</string>
 </resources>

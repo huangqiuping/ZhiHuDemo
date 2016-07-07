@@ -1,6 +1,8 @@
 package com.learn.terry.zhihudemo.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -12,10 +14,12 @@ import android.widget.ImageView;
 
 import com.learn.terry.zhihudemo.R;
 import com.learn.terry.zhihudemo.task.LoadLogoTask;
+import com.learn.terry.zhihudemo.utils.DiskCache;
 import com.learn.terry.zhihudemo.utils.LogUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 
 public class SplashActivity extends AppCompatActivity {
@@ -57,7 +61,7 @@ public class SplashActivity extends AppCompatActivity {
 
         updateLogo();
 
-//        delayToShowHome(2000);
+        delayToShowHome(2000);
     }
 
     private void updateLogo() {
@@ -83,25 +87,24 @@ public class SplashActivity extends AppCompatActivity {
             return;
         }
 
-        String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
-        File logoFile = new File(logoSavePath);
-        if (logoFile.exists()) {
+        DiskCache diskCache = DiskCache.getInstance();
+
+        SharedPreferences sharedPreferences =
+                getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        String url = sharedPreferences.getString(getString(R.string.boot_logo), null);
+        if (url != null) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(logoSavePath, options);
-            LogUtil.log("logo width = " + options.outWidth + " height = " + options.outHeight);
-
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            LogUtil.log("screen width = " + displayMetrics.widthPixels + " height = " + displayMetrics.heightPixels);
-
-            options.inJustDecodeBounds = false;
-            options.inSampleSize =
-                    calculateInSampleSize(options, displayMetrics.widthPixels, displayMetrics.heightPixels);
-
-            LogUtil.log("in sample size = " + options.inSampleSize);
-            Bitmap bitmap = BitmapFactory.decodeFile(logoSavePath, options);
+            InputStream cacheInputStream = diskCache.getFileInputStreamFromCache(url);
+            Bitmap bitmap = BitmapFactory.decodeStream(cacheInputStream);
             startLogo.setImageBitmap(bitmap);
+            if (cacheInputStream != null) {
+                try {
+                    cacheInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         } else {
             try {
                 startLogo.setImageBitmap(BitmapFactory.decodeStream(getAssets().open("logo.jpg")));
@@ -109,6 +112,33 @@ public class SplashActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+//        String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
+//        File logoFile = new File(logoSavePath);
+//        if (logoFile.exists()) {
+//            BitmapFactory.Options options = new BitmapFactory.Options();
+//            options.inJustDecodeBounds = true;
+//            BitmapFactory.decodeFile(logoSavePath, options);
+//            LogUtil.log("logo width = " + options.outWidth + " height = " + options.outHeight);
+//
+//            DisplayMetrics displayMetrics = new DisplayMetrics();
+//            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+//            LogUtil.log("screen width = " + displayMetrics.widthPixels + " height = " + displayMetrics.heightPixels);
+//
+//            options.inJustDecodeBounds = false;
+//            options.inSampleSize =
+//                    calculateInSampleSize(options, displayMetrics.widthPixels, displayMetrics.heightPixels);
+//
+//            LogUtil.log("in sample size = " + options.inSampleSize);
+//            Bitmap bitmap = BitmapFactory.decodeFile(logoSavePath, options);
+//            startLogo.setImageBitmap(bitmap);
+//        } else {
+//            try {
+//                startLogo.setImageBitmap(BitmapFactory.decodeStream(getAssets().open("logo.jpg")));
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {

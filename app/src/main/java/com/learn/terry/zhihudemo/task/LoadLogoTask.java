@@ -1,8 +1,10 @@
 package com.learn.terry.zhihudemo.task;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
+import com.learn.terry.zhihudemo.R;
 import com.learn.terry.zhihudemo.entity.Logo;
 import com.learn.terry.zhihudemo.entity.NewsFetcher;
 import com.learn.terry.zhihudemo.http.Http;
@@ -29,15 +31,24 @@ public class LoadLogoTask extends AsyncTask<Void, Void, Void> {
 
         if (logo != null) {
             String logUrl = logo.getImg();
-            DiskCache diskCache = DiskCache.getInstance(mContext);
+            if (logUrl == null) {
+                return null;
+            }
+
+            DiskCache diskCache = DiskCache.getInstance();
 
             if (diskCache.isFileExistInCache(logUrl)) {
                 return null;
             }
 
-            boolean result = diskCache.addFileToCache(logUrl);
-            LogUtil.log("add file <" + logUrl + "> to cache result = " + result);
-
+            String key = diskCache.addFileToCache(logUrl);
+            LogUtil.log("add file <" + logUrl + "> to cache result = " + key);
+            SharedPreferences sharedPreferences =
+                    mContext.getSharedPreferences(mContext.getString(R.string.preference_file_key),
+                                                  Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(mContext.getString(R.string.boot_logo), logUrl);
+            editor.apply();
         }
 
         return null;

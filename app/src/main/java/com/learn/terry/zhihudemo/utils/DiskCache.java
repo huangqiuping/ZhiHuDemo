@@ -24,7 +24,7 @@ public class DiskCache {
     private DiskCache() {
     }
 
-    public static DiskCache getInstance(Context context) {
+    public static DiskCache getInstance() {
         if (sDiskCache == null) {
             synchronized (DiskCache.class) {
                 if (sDiskCache == null) {
@@ -35,7 +35,7 @@ public class DiskCache {
         return sDiskCache;
     }
 
-    public synchronized void init(File cacheDir, long maxByteSize) {
+    public synchronized void init(Context context, File cacheDir, long maxByteSize) {
         try {
             if (!cacheDir.exists()) {
                 cacheDir.mkdirs();
@@ -46,11 +46,11 @@ public class DiskCache {
         }
     }
 
-    public synchronized boolean addFileToCache(String data) {
+    public synchronized String addFileToCache(String data) {
         LogUtil.log("try to add file <" + data + "> to cache!");
         OutputStream outputStream = null;
         if (isFileExistInCache(data)) {
-            return true;
+            return null;
         }
 
         String key = hashKeyForDisk(data);
@@ -72,7 +72,7 @@ public class DiskCache {
 
                 mDiskLruCache.flush();
 
-                return true;
+                return key;
             } else {
                 LogUtil.log("get editor failed!!!");
             }
@@ -88,7 +88,7 @@ public class DiskCache {
             }
         }
 
-        return false;
+        return null;
 
     }
 

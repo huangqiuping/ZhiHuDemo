@@ -29,7 +29,7 @@ public class ZhiHuApplication extends Application {
         File cacheDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
                                          File.separator + "cacheDir");
 
-        DiskCache.getInstance(context).init(cacheDir, DISK_CACHE_SIZE);
+        DiskCache.getInstance().init(context, cacheDir, DISK_CACHE_SIZE);
     }
 
     private void initImageLoader(Context context) {
