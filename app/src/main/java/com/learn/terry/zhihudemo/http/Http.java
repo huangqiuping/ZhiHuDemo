@@ -2,9 +2,12 @@ package com.learn.terry.zhihudemo.http;
 
 import com.learn.terry.zhihudemo.utils.LogUtil;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,6 +30,7 @@ public class Http {
 
         HttpURLConnection connection = null;
         ByteArrayOutputStream outputStream = null;
+        InputStream inputStream = null;
 
         try {
             URL url = new URL(urlSpec);
@@ -38,7 +42,7 @@ public class Http {
             }
 
             outputStream = new ByteArrayOutputStream();
-            InputStream inputStream = connection.getInputStream();
+            inputStream = connection.getInputStream();
 
             int bytesRead = 0;
             byte[] buffer = new byte[4096];
@@ -48,8 +52,6 @@ public class Http {
 
             return outputStream.toByteArray();
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -57,16 +59,60 @@ public class Http {
                 connection.disconnect();
             }
 
-            if (outputStream != null) {
-                try {
+            try {
+                if (outputStream != null) {
                     outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
+
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
         }
 
         return null;
+    }
+
+    public static boolean downloadUrlToStream(String urlSpec, OutputStream outputStream) {
+        HttpURLConnection urlConnection = null;
+        BufferedOutputStream bufferedOutputStream = null;
+        BufferedInputStream bufferedInputStream = null;
+
+        try {
+            URL url = new URL(urlSpec);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream(), 8 * 1024);
+            bufferedOutputStream = new BufferedOutputStream(outputStream, 8 * 1024);
+            int b;
+            while ((b = bufferedInputStream.read()) != -1) {
+                bufferedOutputStream.write(b);
+            }
+
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+
+            try {
+                if (bufferedInputStream != null) {
+                    bufferedInputStream.close();
+                }
+
+                if (bufferedOutputStream != null) {
+                    bufferedOutputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return false;
     }
 
 }

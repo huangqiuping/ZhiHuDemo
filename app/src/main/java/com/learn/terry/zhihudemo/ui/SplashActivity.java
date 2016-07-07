@@ -57,13 +57,13 @@ public class SplashActivity extends AppCompatActivity {
 
         updateLogo();
 
-        delayToShowHome(2000);
+//        delayToShowHome(2000);
     }
 
     private void updateLogo() {
-        String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
-        LogUtil.log("path = " + logoSavePath);
-        new LoadLogoTask().execute(logoSavePath);
+//        String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
+//        LogUtil.log("path = " + logoSavePath);
+        new LoadLogoTask(this).execute();
     }
 
     @Override
