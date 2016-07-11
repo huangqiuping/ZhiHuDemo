@@ -65,8 +65,6 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void updateLogo() {
-//        String logoSavePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "logo.jpg";
-//        LogUtil.log("path = " + logoSavePath);
         new LoadLogoTask(this).execute();
     }
 
