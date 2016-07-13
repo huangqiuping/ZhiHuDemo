@@ -14,6 +14,9 @@ import java.util.ArrayList;
  * email: hqp770@126.com
  */
 public class DailyNewsDB {
+    public static final int NEWS_TYPE_FAV = 1;
+    public static final int NEWS_TYPE_LATEST = 2;
+
     private DailyNewsDBHelper mDailyNewsDBHelper;
     private SQLiteDatabase mDatabase;
     private static DailyNewsDB sDailyNewsDB;
@@ -36,7 +39,7 @@ public class DailyNewsDB {
         return sDailyNewsDB;
     }
 
-    public void addNewsToFav(News news) {
+    public void addNews(int type, News news) {
         if (news != null) {
             ContentValues values = new ContentValues();
             values.put(NewsEntry.COLUMN_NEWS_ID, news.getId());
@@ -45,20 +48,59 @@ public class DailyNewsDB {
                 values.put(NewsEntry.COLUMN_NEWS_IMAGE, news.getImages().get(0));
             }
 
-            mDatabase.insert(NewsEntry.TABLE_NAME, null, values);
+            switch (type) {
+                case NEWS_TYPE_FAV:
+                    mDatabase.insert(NewsEntry.TABLE_FAV_NEWS_NAME, null, values);
+                    break;
+
+                case NEWS_TYPE_LATEST:
+
+                    mDatabase.insert(NewsEntry.TABLE_LATEST_NEWS_NAME, null, values);
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 
-    public void removeNewsFromFav(News news) {
+    public void removeNews(int type, News news) {
         if (news != null) {
+            switch (type) {
+                case NEWS_TYPE_FAV:
+                    mDatabase.delete(NewsEntry.TABLE_FAV_NEWS_NAME,
+                                     NewsEntry.COLUMN_NEWS_ID + " = ?",
+                                     new String[]{news.getId() + ""});
+                    break;
 
-            mDatabase.delete(NewsEntry.TABLE_NAME, NewsEntry.COLUMN_NEWS_ID + " = ?", new String[]{news.getId() + ""});
+                case NEWS_TYPE_LATEST:
+                    mDatabase.delete(NewsEntry.TABLE_LATEST_NEWS_NAME,
+                                     NewsEntry.COLUMN_NEWS_ID + " = ?",
+                                     new String[]{news.getId() + ""});
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 
-    public ArrayList<News> loadFavNews() {
-        ArrayList<News> favNews = new ArrayList<>();
-        Cursor cursor = mDatabase.query(NewsEntry.TABLE_NAME, null, null, null, null, null, null);
+    public ArrayList<News> loadNews(int type) {
+        ArrayList<News> newsList = new ArrayList<>();
+        Cursor cursor;
+        switch (type) {
+            case NEWS_TYPE_FAV:
+                cursor = mDatabase.query(NewsEntry.TABLE_FAV_NEWS_NAME, null, null, null, null, null, null);
+                break;
+
+            case NEWS_TYPE_LATEST:
+                cursor = mDatabase.query(NewsEntry.TABLE_LATEST_NEWS_NAME, null, null, null, null, null, null);
+                break;
+
+            default:
+                return newsList;
+        }
+
         if (cursor.moveToFirst()) {
             do {
                 News news = new News();
@@ -69,16 +111,16 @@ public class DailyNewsDB {
                 images.add(imageUrl);
                 news.setImages(images);
 
-                favNews.add(news);
+                newsList.add(news);
             } while (cursor.moveToNext());
         }
         cursor.close();
 
-        return favNews;
+        return newsList;
     }
 
     public boolean isFavNews(News news) {
-        Cursor cursor = mDatabase.query(NewsEntry.TABLE_NAME,
+        Cursor cursor = mDatabase.query(NewsEntry.TABLE_FAV_NEWS_NAME,
                                         null,
                                         NewsEntry.COLUMN_NEWS_ID + " = ?",
                                         new String[]{news.getId() + ""},
@@ -93,5 +135,4 @@ public class DailyNewsDB {
             return false;
         }
     }
-
 }

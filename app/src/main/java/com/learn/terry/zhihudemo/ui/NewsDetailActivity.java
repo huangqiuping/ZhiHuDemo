@@ -90,11 +90,13 @@ public class NewsDetailActivity extends AppCompatActivity implements NewsDetailW
 
                 if (!isFavourite) {
                     item.setIcon(R.drawable.ic_favorite_red);
-                    mDailyNewsDB.addNewsToFav(mNews);
+//                    mDailyNewsDB.addNewsToFav(mNews);
+                    mDailyNewsDB.addNews(DailyNewsDB.NEWS_TYPE_FAV, mNews);
                     isFavourite = true;
                 } else {
                     item.setIcon(R.drawable.ic_favorite_white);
-                    mDailyNewsDB.removeNewsFromFav(mNews);
+//                    mDailyNewsDB.removeNewsFromFav(mNews);
+                    mDailyNewsDB.removeNews(DailyNewsDB.NEWS_TYPE_FAV, mNews);
                     isFavourite = false;
                 }
                 return true;

@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.learn.terry.zhihudemo.R;
 import com.learn.terry.zhihudemo.adapter.NewsAdapter;
+import com.learn.terry.zhihudemo.db.DailyNewsDB;
 import com.learn.terry.zhihudemo.task.LoadLogoTask;
 import com.learn.terry.zhihudemo.task.LoadNewsTask;
 import com.learn.terry.zhihudemo.utils.LogUtil;
@@ -23,9 +24,9 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener,
-                                                               LoadNewsTask.IOnFinishRefreshListener,
-                                                               AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity
+        implements SwipeRefreshLayout.OnRefreshListener, LoadNewsTask.IOnFinishRefreshListener,
+                   AdapterView.OnItemClickListener {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mNewList;
     private NewsAdapter mNewsAdapter;
@@ -42,18 +43,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                                                     android.R.color.holo_orange_light,
                                                     android.R.color.holo_blue_bright);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-                onRefresh();
-            }
-        });
+//        mSwipeRefreshLayout.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                mSwipeRefreshLayout.setRefreshing(true);
+//                onRefresh();
+//            }
+//        });
 
         setTitle(getTime());
 
         mNewList = (ListView) findViewById(R.id.news_list);
-        mNewsAdapter = new NewsAdapter(this, R.layout.news_item);
+        mNewsAdapter = new NewsAdapter(this,
+                                       R.layout.news_item,
+                                       DailyNewsDB.getInstance(this).loadNews(DailyNewsDB.NEWS_TYPE_LATEST));
         mNewList.setAdapter(mNewsAdapter);
         mNewList.setOnItemClickListener(this);
 
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     public void onRefresh() {
         LogUtil.log("onRefresh...");
-        new LoadNewsTask(mNewsAdapter, MainActivity.this).execute();
+        new LoadNewsTask(this, mNewsAdapter, MainActivity.this).execute();
     }
 
     @Override

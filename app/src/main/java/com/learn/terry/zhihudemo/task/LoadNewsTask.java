@@ -1,8 +1,10 @@
 package com.learn.terry.zhihudemo.task;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.learn.terry.zhihudemo.adapter.NewsAdapter;
+import com.learn.terry.zhihudemo.db.DailyNewsDB;
 import com.learn.terry.zhihudemo.entity.News;
 import com.learn.terry.zhihudemo.entity.NewsFetcher;
 
@@ -16,12 +18,14 @@ public class LoadNewsTask extends AsyncTask<Void, Void, ArrayList<News>> {
     private NewsAdapter mNewsAdapter;
     private NewsFetcher mNewsFetcher = new NewsFetcher();
     private IOnFinishRefreshListener mRefreshListener;
+    private Context mContext;
 
     public LoadNewsTask(NewsAdapter newsAdapter) {
         mNewsAdapter = newsAdapter;
     }
 
-    public LoadNewsTask(NewsAdapter newsAdapter, IOnFinishRefreshListener refreshListener) {
+    public LoadNewsTask(Context context, NewsAdapter newsAdapter, IOnFinishRefreshListener refreshListener) {
+        mContext = context;
         mNewsAdapter = newsAdapter;
         mRefreshListener = refreshListener;
     }
@@ -37,6 +41,10 @@ public class LoadNewsTask extends AsyncTask<Void, Void, ArrayList<News>> {
         mNewsAdapter.refreshNewsList(newses);
         if (mRefreshListener != null) {
             mRefreshListener.onFinishRefresh();
+        }
+        DailyNewsDB dailyNewsDB = DailyNewsDB.getInstance(mContext);
+        for (News news : newses) {
+            dailyNewsDB.addNews(DailyNewsDB.NEWS_TYPE_LATEST, news);
         }
     }
 
