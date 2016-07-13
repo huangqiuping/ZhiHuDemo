@@ -14,18 +14,23 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".ui.MainActivity">
-
         </activity>
-        <activity android:name=".ui.NewsDetailActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity
+            android:name=".ui.NewsDetailActivity"
+            android:parentActivityName=".ui.MainActivity">
         </activity>
-        <activity android:name=".ui.SplashActivity"
+        <activity
+            android:name=".ui.SplashActivity"
             android:theme="@style/NoTitleFullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.FavoriteListActivity"
+            android:parentActivityName=".ui.MainActivity">
         </activity>
     </application>
 
