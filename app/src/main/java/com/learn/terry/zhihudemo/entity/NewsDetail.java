@@ -1,12 +1,13 @@
 package com.learn.terry.zhihudemo.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by dvb-sky on 2016/7/1.
  */
-public class NewsDetail {
+public class NewsDetail implements Serializable{
 
     /**
      * body : <div class="main-wrap content-wrap">

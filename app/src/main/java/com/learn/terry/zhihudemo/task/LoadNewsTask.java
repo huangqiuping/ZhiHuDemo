@@ -41,6 +41,6 @@ public class LoadNewsTask extends AsyncTask<Void, Void, ArrayList<News>> {
     }
 
     public interface IOnFinishRefreshListener {
-        public void onFinishRefresh();
+        void onFinishRefresh();
     }
 }
