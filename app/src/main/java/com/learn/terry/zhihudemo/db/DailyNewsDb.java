@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 
 import com.learn.terry.zhihudemo.entity.News;
 
@@ -37,6 +38,48 @@ public class DailyNewsDB {
         }
 
         return sDailyNewsDB;
+    }
+
+    public void clearNews(int type) {
+        Cursor cursor;
+        switch (type) {
+            case NEWS_TYPE_FAV:
+                cursor = mDatabase.query(NewsEntry.TABLE_FAV_NEWS_NAME, null, null, null, null, null, null);
+                break;
+
+            case NEWS_TYPE_LATEST:
+                cursor = mDatabase.query(NewsEntry.TABLE_LATEST_NEWS_NAME, null, null, null, null, null, null);
+                break;
+
+            default:
+                return;
+        }
+
+        if (cursor.moveToFirst()) {
+            do {
+                News news = getNews(cursor);
+
+                removeNews(type, news);
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+
+    }
+
+    @NonNull
+    private News getNews(Cursor cursor) {
+        News news = new News();
+        news.setId(cursor.getInt(1));
+        news.setTitle(cursor.getString(2));
+        String imageUrl = cursor.getString(3);
+        ArrayList<String> images = new ArrayList<>();
+        images.add(imageUrl);
+        news.setImages(images);
+        
+        return news;
     }
 
     public void addNews(int type, News news) {
@@ -103,13 +146,7 @@ public class DailyNewsDB {
 
         if (cursor.moveToFirst()) {
             do {
-                News news = new News();
-                news.setId(cursor.getInt(1));
-                news.setTitle(cursor.getString(2));
-                String imageUrl = cursor.getString(3);
-                ArrayList<String> images = new ArrayList<>();
-                images.add(imageUrl);
-                news.setImages(images);
+                News news = getNews(cursor);
 
                 newsList.add(news);
             } while (cursor.moveToNext());

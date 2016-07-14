@@ -43,6 +43,8 @@ public class LoadNewsTask extends AsyncTask<Void, Void, ArrayList<News>> {
             mRefreshListener.onFinishRefresh();
         }
         DailyNewsDB dailyNewsDB = DailyNewsDB.getInstance(mContext);
+//        dailyNewsDB.clearNews(DailyNewsDB.NEWS_TYPE_LATEST);
+
         for (News news : newses) {
             dailyNewsDB.addNews(DailyNewsDB.NEWS_TYPE_LATEST, news);
         }
