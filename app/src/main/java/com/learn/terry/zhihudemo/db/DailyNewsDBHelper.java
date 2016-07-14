@@ -29,7 +29,8 @@ public class DailyNewsDBHelper extends SQLiteOpenHelper {
             NewsEntry.COLUMN_NEWS_IMAGE + TEXT_TYPE +
             " )";
 
-    private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + NewsEntry.TABLE_FAV_NEWS_NAME;
+    private static final String SQL_DELETE_FAV_ENTRIES = "DROP TABLE IF EXISTS " + NewsEntry.TABLE_FAV_NEWS_NAME;
+    private static final String SQL_DELETE_LATEST_ENTRIES = "DROP TABLE IF EXISTS " + NewsEntry.TABLE_LATEST_NEWS_NAME;
 
     public DailyNewsDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -43,6 +44,14 @@ public class DailyNewsDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL(SQL_DELETE_FAV_ENTRIES);
+        db.execSQL(SQL_DELETE_LATEST_ENTRIES);
 
+        onCreate(db);
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
     }
 }
