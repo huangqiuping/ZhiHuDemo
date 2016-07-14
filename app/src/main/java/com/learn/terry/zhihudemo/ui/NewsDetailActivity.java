@@ -13,15 +13,19 @@ import android.webkit.WebView;
 import com.learn.terry.zhihudemo.R;
 import com.learn.terry.zhihudemo.db.DailyNewsDB;
 import com.learn.terry.zhihudemo.entity.News;
+import com.learn.terry.zhihudemo.entity.NewsDetail;
 import com.learn.terry.zhihudemo.task.LoadNewsDetailTask;
 import com.learn.terry.zhihudemo.utils.LogUtil;
 
-public class NewsDetailActivity extends AppCompatActivity implements NewsDetailWebView.OnScrollChangeListener {
+import java.io.Serializable;
+
+public class NewsDetailActivity extends AppCompatActivity implements NewsDetailWebView.OnScrollChangeListener, LoadNewsDetailTask.OnFinishLoadNewsDetailListener{
     private NewsDetailWebView mWebView;
     private ActionBar mActionBar;
     private boolean isFavourite = false;
     private News mNews;
     private DailyNewsDB mDailyNewsDB;
+    private NewsDetail mNewsDetail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +33,7 @@ public class NewsDetailActivity extends AppCompatActivity implements NewsDetailW
         setContentView(R.layout.activity_news_detail);
 
         mNews = (News) getIntent().getSerializableExtra("news");
-        LogUtil.log(mNews.toString());
+//        LogUtil.log(mNews.toString());
 
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
 //        setSupportActionBar(toolbar);
@@ -47,7 +51,16 @@ public class NewsDetailActivity extends AppCompatActivity implements NewsDetailW
 
         configWebView(mWebView);
 
-        new LoadNewsDetailTask(mWebView).execute(mNews);
+//        new LoadNewsDetailTask(mWebView).execute(mNews);
+        if (savedInstanceState != null) {
+            NewsDetail newsDetail = (NewsDetail) savedInstanceState.getSerializable("news_detail");
+            if (newsDetail != null) {
+                mNewsDetail = newsDetail;
+                showNewsDetail(newsDetail);
+                return;
+            }
+        }
+        new LoadNewsDetailTask(this).execute(mNews);
     }
 
     private void configWebView(WebView webView) {
@@ -124,6 +137,50 @@ public class NewsDetailActivity extends AppCompatActivity implements NewsDetailW
             mActionBar.show();
         } else {
             mActionBar.hide();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        LogUtil.log("onSaveInstanceState...");
+
+        outState.putSerializable("news_detail", mNewsDetail);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onFinishLoad(NewsDetail newsDetail) {
+        mNewsDetail = newsDetail;
+
+        showNewsDetail(newsDetail);
+    }
+
+    private void showNewsDetail(NewsDetail newsDetail) {
+        if (mWebView != null) {
+            String headerImage;
+            if (newsDetail.getImage() == null || newsDetail.getImage() == "") {
+                headerImage = "";
+
+            } else {
+                headerImage = newsDetail.getImage();
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("<div class=\"img-wrap\">")
+                    .append("<h1 class=\"headline-title\">")
+                    .append(newsDetail.getTitle())
+                    .append("</h1>")
+                    .append("<span class=\"img-source\">")
+                    .append(newsDetail.getImage_source())
+                    .append("</span>")
+                    .append("<img src=\"")
+                    .append(headerImage)
+                    .append("\" alt=\"\">")
+                    .append("<div class=\"img-mask\"></div>");
+            String mNewsContent = "<link rel=\"stylesheet\" type=\"text/css\" href=\"news_content_style.css\"/>" +
+                    "<link rel=\"stylesheet\" type=\"text/css\" href=\"news_header_style.css\"/>" +
+                    newsDetail.getBody().replace("<div class=\"img-place-holder\">", sb.toString());
+            mWebView.loadDataWithBaseURL("file:///android_asset/", mNewsContent, "text/html", "UTF-8", null);
         }
     }
 }
